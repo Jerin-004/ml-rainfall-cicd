@@ -18,6 +18,7 @@ def home():
 
 @app.post("/predict")
 def predict(request: PredictRequest):
-    arr = np.array(request.features).reshape(1, -1)
-    pred = model.predict(arr)[0]
+  
+    df = pd.DataFrame([request.features], columns=feature_names)
+    pred = model.predict(df)[0]
     return {"rainfall_prediction": "yes" if pred == 1 else "no"}
