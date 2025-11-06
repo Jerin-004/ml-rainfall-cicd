@@ -1,0 +1,20 @@
+{
+  "trained_at": "2025-11-06T11:03:52.517275Z",
+  "features": [
+    "day",
+    "pressure",
+    "maxtemp",
+    "temparature",
+    "mintemp",
+    "dewpoint",
+    "humidity",
+    "cloud",
+    "sunshine",
+    "winddirection",
+    "windspeed"
+  ],
+  "train_size": 292,
+  "test_size": 74,
+  "train_accuracy": 0.8356164383561644,
+  "model": "LogisticRegression"
+}
