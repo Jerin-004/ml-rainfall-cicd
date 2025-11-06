@@ -1,0 +1,62 @@
+name: CI/CD for ML Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test-train:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          . .venv/bin/activate
+          pytest -q
+
+      - name: Train model
+        run: |
+          . .venv/bin/activate
+          python -m src.train --data data/rainfall.csv --out artifacts
+
+      - name: Evaluate model
+        run: |
+          . .venv/bin/activate
+          python -m src.evaluate --artifacts artifacts
+
+      - name: Upload artifacts (model + metrics)
+        uses: actions/upload-artifact@v4
+        with:
+          name: rainfall-model-artifacts
+          path: artifacts/*
+          if-no-files-found: error
+
+      - name: Deploy
+        run: |
+          mkdir -p deploy
+          cp -r artifacts/* deploy/
+          echo "Deployed model files to deploy/ (uploaded as artifact)."
