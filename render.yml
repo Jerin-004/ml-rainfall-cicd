@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: rainfall-ml-api
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn src.app:app --host 0.0.0.0 --port 10000"
+    envVars:
+      - key: MODEL_PATH
+        value: artifacts/model.joblib

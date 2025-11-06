@@ -3,8 +3,6 @@ name: CI/CD for ML Pipeline
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build-test-train:
@@ -36,6 +34,7 @@ jobs:
       - name: Run tests
         run: |
           . .venv/bin/activate
+          export PYTHONPATH="$PYTHONPATH:$(pwd)"
           pytest -q
 
       - name: Train model
@@ -48,15 +47,13 @@ jobs:
           . .venv/bin/activate
           python -m src.evaluate --artifacts artifacts
 
-      - name: Upload artifacts (model + metrics)
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: rainfall-model-artifacts
           path: artifacts/*
           if-no-files-found: error
 
-      - name: Deploy
+      - name: Trigger Render Deploy
         run: |
-          mkdir -p deploy
-          cp -r artifacts/* deploy/
-          echo "Deployed model files to deploy/ (uploaded as artifact)."
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
